@@ -15,7 +15,7 @@ from zoneinfo import ZoneInfo
 import polars as pl
 import requests
 
-from sharpmkt import http
+from sharpmkt import config, http
 from sharpmkt.config import DERIVED, DIVISIONS, RAW, SEASON, USER_AGENT
 
 URL = "https://www.football-data.co.uk/mmz4281/{season}/{div}.csv"
@@ -63,6 +63,7 @@ def parse(body: bytes, div: str) -> pl.DataFrame:
 
 
 def main() -> None:
+    config.require_season_allowed()
     parts, extra = [], {}
     for div in DIVISIONS:
         body, entry = fetch(div)

@@ -19,7 +19,7 @@ from datetime import UTC, datetime
 
 import polars as pl
 
-from sharpmkt import http
+from sharpmkt import config, http
 from sharpmkt.config import (
     DERIVED,
     LEAGUES,
@@ -112,6 +112,7 @@ def prices(matched: pl.DataFrame) -> pl.DataFrame:
 
 
 def main() -> None:
+    config.require_season_allowed()
     stage = sys.argv[1] if len(sys.argv) > 1 else "markets"
     DERIVED.mkdir(parents=True, exist_ok=True)
     if stage == "markets":

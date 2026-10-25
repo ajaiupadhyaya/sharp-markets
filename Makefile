@@ -1,4 +1,4 @@
-.PHONY: all test lint fixtures markets match prices panel power
+.PHONY: all test lint fixtures markets match prices panel power dryrun
 
 # Network steps (fixtures, markets, prices) read through the response cache in data/raw/cache,
 # so a rerun only fetches what isn't cached yet.
@@ -29,3 +29,6 @@ panel:
 
 power:
 	uv run python -m sharpmkt.power
+
+dryrun:
+	uv run python -m sharpmkt.confirm --dry-run 2025-12-01

@@ -10,6 +10,7 @@ be 2026–27 matches that kick off after the pre-analysis plan is signed.
 
 - `SCOPING.md`: prior literature, data access and the draft design.
 - `docs/power.md`: the 2025–26 power check.
+- `docs/pap/pre-analysis-plan.md`: the DRAFT pre-analysis plan (unsigned).
 
 ```bash
 make all   # every step: fixtures, venue markets, matching, kickoff prices, panel, power, tests

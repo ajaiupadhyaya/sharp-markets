@@ -17,7 +17,7 @@ from difflib import SequenceMatcher
 
 import polars as pl
 
-from sharpmkt import kalshi, polymarket
+from sharpmkt import config, kalshi, polymarket
 from sharpmkt.config import DERIVED
 from sharpmkt.footballdata import FIXTURES
 
@@ -112,6 +112,7 @@ def build() -> pl.DataFrame:
 
 
 def main() -> None:
+    config.require_season_allowed()
     df = build()
     df.write_parquet(MATCHED)
     print(f"{df.height} market rows -> {MATCHED}")

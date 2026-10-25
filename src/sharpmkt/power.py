@@ -128,14 +128,14 @@ def equivalence(panel: pl.DataFrame) -> list[str]:
     return lines
 
 
-def rq2(panel: pl.DataFrame) -> list[str]:
+def rq2(panel: pl.DataFrame, venues: dict | None = None) -> list[str]:
     lines = ["", "### RQ2: does the venue add information beyond Betfair? (encompassing)", "",
              "Logarithmic opinion pool P(o) ~ exp(b_bf log p_bf(o) + b_v log p_v(o)), fitted by "
              "maximum likelihood, clustered by division x ISO week. b_v = 0: Betfair "
              "encompasses the venue; b_bf = 0: the venue encompasses Betfair.", "",
              "| venue | matches | b_bf (se) | b_v (se) | corr(b_bf, b_v) | MDE for b_v: full / "
              "60% / 40% |", "|---|---|---|---|---|---|"]
-    for v, label in VENUES_RQ.items():
+    for v, label in (venues or VENUES_RQ).items():
         w = pair_wide(panel, v)
         res = w["result"].replace_strict({"H": 0, "D": 1, "A": 2}).to_numpy()
         b, cov = estimators.pool([_logp(w, "b"), _logp(w, "v")], res, w["cluster"].to_numpy())
