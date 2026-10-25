@@ -10,6 +10,7 @@ is the 2026–27 matches kicking off after the tag time, through 2027-06-30. The
 by `uv run python -m sharpmkt.confirm`, after the window closes. Until then, every pipeline
 module refuses the 2026–27 season.
 
+- **Paper:** [`paper/main.pdf`](paper/main.pdf), a registered report: the design, the pre-registered test and the 2025–26 exploratory evidence. The confirmatory results are added after 2027-06-30. `make paper` rebuilds it.
 - `SCOPING.md`: prior literature, data access and the draft design.
 - `docs/power.md`: the 2025–26 power check.
 - `docs/pap/pre-analysis-plan.md`: the signed pre-analysis plan.

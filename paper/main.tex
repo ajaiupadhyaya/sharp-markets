@@ -1,0 +1,442 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{caption}
+\usepackage[authoryear,round]{natbib}
+\usepackage{xcolor}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+
+\input{generated/numbers.tex}
+% \input is not expandable inside tabular (LaTeX 2020+); the TeX primitive is.
+\makeatletter\newcommand{\tabinput}[1]{\@@input #1 }\makeatother
+
+\newcommand{\repo}{\url{https://github.com/ajaiupadhyaya/sharp-markets}}
+
+\title{Are Prediction Markets Sharp?\\[0.3em]
+\large Kalshi, Polymarket and the Betfair Exchange Closing Line in European Football\\[0.2em]
+\normalsize A Registered Report}
+\author{Ajai Upadhyaya}
+\date{25 October 2026\\[0.3em]\small Pre-analysis plan tagged \texttt{pap-v1}, 2026-10-25 19:22:02 UTC}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Sport has become the largest category on the new event-contract exchanges, yet
+existing studies judge these markets only against realised outcomes. I compare them instead with
+the benchmark sports bettors have long used: the Betfair Exchange closing line. Across
+\nLeagues{} European football leagues in 2025--26, I match \nKalshiMatched{} Kalshi and
+\nPmMatched{} Polymarket match-winner markets to fixtures and compare their kickoff
+probabilities with Betfair's closing odds, match by match. In this exploratory season the
+paired log-score difference is \rqOneMeanK{} nats per match for Kalshi (s.e.\ \rqOneSeK) and
+\rqOneMeanP{} for Polymarket (s.e.\ \rqOneSeP). Both are statistically indistinguishable from
+Betfair, while the ordinary bookmaker average is clearly worse (\rqOneMeanAvg, s.e.\
+\rqOneSeAvg). Read at kickoff, both venues' probabilities are slightly more extreme than
+Betfair's. Most of that gap disappears when the venues are read 30--60 minutes earlier, so it
+reflects late information rather than a pricing bias. The paper's confirmatory hypothesis was
+registered before any of its data existed: on 2026--27 matches played after the plan was
+tagged, Kalshi's probabilities are within $\pm 0.002$ nats per match of the Betfair close,
+tested by two one-sided tests. That result will be added after the window closes on 30 June
+2027. Nothing in this paper is betting or investment advice.
+\end{abstract}
+
+\section{Introduction}
+
+Since mid-2025, most of the volume on Kalshi, the CFTC-regulated event-contract exchange, and on
+Polymarket, its crypto-settled rival, has been sport \citep{pew2026}. That raises a plain
+question with real money behind it: do these markets price a football match as well as the
+markets that have priced sport for decades?
+
+The calibration literature that has grown up around the new venues doesn't answer it.
+\citet{burgi2025} show that Kalshi's prices are fairly accurate, become more accurate as markets
+approach their close, and display a favourite--longshot bias. \citet{cardozo2026} find the bias
+across 588 million Polymarket trades, except in sport. \citet{moshrefi2026} and \citet{le2026}
+study calibration by horizon and domain. Every one of these studies compares prices with
+realised frequencies. None compares them with the \emph{closing line}, the last price of the
+sharpest pre-existing market and the standard benchmark in sports betting. \citet{diercks2026}
+make exactly this kind of benchmark comparison for Kalshi's macroeconomic contracts against fed
+funds futures and surveys. This paper does it for sport.
+
+The design is paired: two venues price the same outcome of the same match at the same moment.
+Most match-level noise cancels, and every season brings thousands of independent matches. The
+precision that results is very high. In the 2025--26 exploratory season the standard error of
+Kalshi's mean log-score difference from Betfair is \rqOneSeK{} nats per match. That is small
+enough to detect a gap a third the size of the one separating ordinary bookmakers from the
+exchange.
+
+The paper is a registered report. Everything in Section~\ref{sec:explore} comes from 2025--26,
+was looked at freely, and is exploratory. The single confirmatory hypothesis
+(Section~\ref{sec:design}) was fixed in a pre-analysis plan before any of its data existed. Its
+sample is every 2026--27 match kicking off after the plan's git tag. Its analysis runs once,
+through a script whose code is bound to that tag. Section~\ref{sec:confirm} says what will be
+reported there.
+
+\section{Related work}
+
+\citet{wolfers2004} survey prediction markets as forecasting tools. The favourite--longshot bias
+(longshots overpriced, favourites underpriced) is one of the oldest regularities in betting
+markets. \citet{snowberg2010} attribute it to misperception of small probabilities rather than to
+risk-love. On the new venues, \citet{burgi2025} document it on Kalshi across contract types,
+with takers losing about 32\% on average and makers about 10\%. \citet{cardozo2026} find a
+two-sided pattern on Polymarket in crypto and politics that is absent in sport, and show that its
+sign depends on how related contracts are grouped. \citet{moshrefi2026} reports that Kalshi's
+sports calibration becomes step-like in the final minutes, and \citet{le2026} finds
+horizon-dependent bias in Polymarket sports beyond a week. Across venues, \citet{ng2025} find
+two-way price discovery between Polymarket and Kalshi, with Kalshi leading in sport, and
+\citet{gebele2026} document law-of-one-price deviations of 2--4\% across ten venues.
+\citet{kanoria2025} estimate that about a quarter of Polymarket's reported volume is wash
+trading, which matters here because volume is the natural liquidity measure.
+
+The methods are standard:
+\begin{itemize}
+  \item log and Brier scores, which are strictly proper \citep{gneiting2007};
+  \item paired score differences, compared as in \citet{diebold1995};
+  \item equivalence tested by two one-sided tests \citep{schuirmann1987,lakens2017};
+  \item cluster-robust standard errors \citep{cameron2015};
+  \item bookmaker margins removed proportionally or by \citet{shin1993}'s method;
+  \item information content tested with a logarithmic opinion pool \citep{genest1986}.
+\end{itemize}
+
+\section{Data}\label{sec:data}
+
+\paragraph{Fixtures and the closing line.} Results and closing 1X2 odds come from
+Football-Data.co.uk \citep{footballdata}: the \nLeagues{} divisions in Table~\ref{tab:coverage},
+\nFixtures{} league fixtures in 2025--26. Betfair Exchange closing odds are available for
+\nBetfair{} of them, and for the 2026--27 season. Pinnacle closing odds cover only about 40\% of
+2025--26 and none of 2026--27, so Pinnacle appears only as a yardstick. Kickoff times are
+converted from UK time to UTC.
+
+\paragraph{Kalshi.} The public API lists \nKalshiEvents{} settled match events in these leagues
+for 2025--26, each with three markets (home, away, tie). For each market I read the minute
+candles over the three hours before kickoff. The price is the mid of the closing yes-bid and
+yes-ask in the last candle at or before kickoff. When the book is one-sided or wider than ten
+cents, the price falls back to the last trade; that happened for \kFallback{} fixture. At kickoff
+the median spread is \kSpread{} cents and the median volume is \kVolume{} contracts per match.
+
+\paragraph{Polymarket.} The Gamma API lists \nPmEvents{} closed full-time-result events. Each has
+two ``Will X win on DATE?'' markets and one draw market; halftime, spread and other side markets
+are excluded. The price is the last point of the CLOB price history at or before kickoff.
+
+\paragraph{Matching.} Each venue event is matched by normalised team-name similarity to a
+football-data fixture in the same division within a day, subject to a minimum score and a margin
+over the runner-up. \nKalshiMatched{} Kalshi and \nPmMatched{} Polymarket events match (98\%).
+Fixtures where the venue's settlement disagrees with football-data's result are dropped (4 for
+Kalshi, 6 for Polymarket). Every source's three prices are divided by their sum.
+
+\begin{table}[htbp]\centering\small
+\caption{Fixtures priced, 2025--26, by division}\label{tab:coverage}
+\begin{tabular}{lrrr}\toprule
+Division & Betfair close & Kalshi & Polymarket\\\midrule
+\tabinput{generated/tab_coverage.tex}
+\bottomrule\end{tabular}
+\end{table}
+
+\section{Measures and estimators}\label{sec:measures}
+
+For fixture $i$ with result $r_i \in \{H, D, A\}$, the paired log-score difference between a
+venue $v$ and Betfair is
+\begin{equation}
+d_i = \log p_{v,i}(r_i) - \log p_{\mathrm{BF},i}(r_i),
+\end{equation}
+which is positive when the venue was more accurate. Brier-score differences are defined with the
+sign reversed, so a positive value still favours the venue. Standard errors of means are CR1
+cluster-robust by division $\times$ ISO week, because matches on the same weekend in the same
+league share shocks. In practice, clustering changes the standard error very little.
+
+Calibration (the favourite--longshot bias) is measured by the slope $b$ in
+$\operatorname{logit}\Pr(y=1) = a + b \operatorname{logit}(p)$ over the three outcome rows of
+each match. $b > 1$ means favourites are underpriced and longshots overpriced. Venue and Betfair
+slopes are fitted jointly on the same rows, so their difference has a clustered standard error.
+
+Information content is tested with the pool
+$\Pr(o) \propto \exp\{\beta_{\mathrm{BF}} \log p_{\mathrm{BF}}(o) + \beta_v \log p_v(o)\}$,
+fitted by maximum likelihood. $\beta_v = 0$ means Betfair encompasses the venue.
+
+\section{Exploratory evidence, 2025--26}\label{sec:explore}
+
+\emph{Everything in this section is exploratory.} It was looked at freely, and it informed the
+design in Section~\ref{sec:design}.
+
+\subsection{Accuracy}
+
+Table~\ref{tab:rq1} reports the paired comparison. Kalshi and Polymarket are statistically
+indistinguishable from Betfair on both scores. The bookmaker average scores \rqOneMeanAvg{} nats
+per match against Betfair, and Pinnacle \rqOneMeanPin: both are less accurate than the exchange.
+That ordering is expected. It also gives the scale
+for what follows: the gap between ordinary bookmakers and the exchange is about 0.002 nats per
+match.
+
+\begin{table}[htbp]\centering\small
+\begin{threeparttable}
+\caption{Accuracy against the Betfair Exchange closing line, 2025--26 (exploratory)}\label{tab:rq1}
+\begin{tabular}{lrrrrrrr}\toprule
+& & & \multicolumn{3}{c}{Log score} & \multicolumn{2}{c}{Brier score}\\
+\cmidrule(lr){4-6}\cmidrule(lr){7-8}
+Source & Matches & Clusters & Mean $d$ & s.e. & MDE & Mean & s.e.\\\midrule
+\tabinput{generated/tab_rq1.tex}
+\bottomrule\end{tabular}
+\begin{tablenotes}\footnotesize
+\item Each source is paired with Betfair on the fixtures both priced. $d > 0$ means the source was
+more accurate than Betfair. s.e.\ clustered by division $\times$ ISO week. MDE: minimum
+detectable effect, 5\% two-sided, 80\% power.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Figure~\ref{fig:calib} shows why: on the same outcome rows, Kalshi's and Betfair's calibration
+curves lie on top of each other.
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.62\textwidth, height=0.52\textwidth, xmin=0, xmax=1, ymin=0, ymax=1,
+  xlabel={Price (normalised probability)}, ylabel={Observed frequency},
+  legend pos=north west, legend cell align=left, grid=major, grid style={gray!20}]
+\addplot[gray, dashed, domain=0:1] {x};
+\addlegendentry{Perfect calibration}
+\addplot[only marks, mark=o, blue] table[x=pred, y=obs, col sep=comma] {generated/fig_calib_kalshi.csv};
+\addlegendentry{Kalshi}
+\addplot[only marks, mark=x, red] table[x=pred, y=obs, col sep=comma] {generated/fig_calib_betfair.csv};
+\addlegendentry{Betfair close}
+\end{axis}
+\end{tikzpicture}
+\caption{Calibration of Kalshi at kickoff and of the Betfair close on the same outcome rows,
+2025--26, in twenty price bins (bins with at least 30 rows).}\label{fig:calib}
+\end{figure}
+
+Table~\ref{tab:robust} runs the confirmatory test of Section~\ref{sec:design} through the
+confirmatory code on the whole exploratory season, with its robustness variants. In 2025--26,
+Kalshi's 90\% interval, [\hOneLo, \hOneHi], lies inside $\pm 0.002$. So does Polymarket's, and so
+does every variant except the reads taken an hour or more before kickoff, which are noisier
+against Betfair's close. The bookmaker average fails, as it should.
+
+\begin{table}[htbp]\centering\small
+\begin{threeparttable}
+\caption{Equivalence within $\pm 0.002$ nats per match, whole 2025--26 season (exploratory)}\label{tab:robust}
+\begin{tabular}{lrrrcc}\toprule
+Specification & Matches & Mean $d$ & s.e. & 90\% CI & Equivalent\\\midrule
+\tabinput{generated/tab_robust.tex}
+\bottomrule\end{tabular}
+\begin{tablenotes}\footnotesize
+\item Two one-sided tests at 5\% each: equivalence holds iff the 90\% CI lies inside
+$(-0.002, 0.002)$. Computed with \texttt{sharpmkt.confirm}, the confirmatory script, on the
+exploratory season.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Information content}
+
+The opinion pool (Table~\ref{tab:rq2}) can't separate Kalshi from Betfair. Their log probabilities
+are so nearly collinear that the weights trade off one for one, and the minimum detectable weight
+on Kalshi exceeds 1. The test is uninformative for Kalshi, so it isn't pursued; for Polymarket it
+is borderline.
+
+\begin{table}[htbp]\centering\small
+\caption{Logarithmic opinion pool with Betfair, 2025--26 (exploratory)}\label{tab:rq2}
+\begin{tabular}{lrccc}\toprule
+Venue & Matches & $\beta_{\mathrm{BF}}$ (s.e.) & $\beta_v$ (s.e.) & MDE for $\beta_v$\\\midrule
+\tabinput{generated/tab_rq2.tex}
+\bottomrule\end{tabular}
+\end{table}
+
+\subsection{Timing: the finding of the exploratory season}
+
+Read at kickoff, both venues' calibration slopes are slightly \emph{lower} than Betfair's on the
+same rows: by \gapZeroK{} for Kalshi and \gapZeroP{} for Polymarket. Their probabilities are a
+little more extreme. The natural explanation is timing. The venues are read in the last minute,
+Betfair's ``closing'' snapshot is taken some time before kickoff, and the last half hour brings
+team news.
+
+Reading the venues earlier, from the same candles, tests that explanation
+(Table~\ref{tab:timing}, Figure~\ref{fig:timing}). Polymarket's gap is gone 30--60 minutes before
+kickoff (\gapSixtyP{} at $-60$ minutes). Kalshi's shrinks by about 40\% but persists
+(\gapSixtyK{}, s.e.\ \gapSixtySeK{}, at $-60$ minutes). Accuracy barely moves with the read time.
+
+The timing pattern is the result I report from this season: \emph{the last half hour before
+kickoff makes prediction-market prices more extreme than the exchange's close}. The persistent
+part of Kalshi's gap is smaller than one season can detect at a timing-matched read (minimum
+detectable gap about 0.014). It is reported as a pattern, not tested.
+
+\begin{table}[htbp]\centering\small
+\begin{threeparttable}
+\caption{Reading the venues earlier, 2025--26 (exploratory)}\label{tab:timing}
+\begin{tabular}{lrrrrrr}\toprule
+& Minutes before & & \multicolumn{2}{c}{Slope gap to Betfair} & \multicolumn{2}{c}{Log score $d$}\\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+Venue & kickoff & Matches & Gap & s.e. & Mean & s.e.\\\midrule
+\tabinput{generated/tab_timing.tex}
+\bottomrule\end{tabular}
+\begin{tablenotes}\footnotesize
+\item The same fixtures at every read time within each venue. Gap: the venue's calibration slope
+minus Betfair's, on the same outcome rows.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}
+\begin{axis}[width=0.62\textwidth, height=0.45\textwidth, xlabel={Minutes before kickoff},
+  ylabel={Slope gap to Betfair}, x dir=reverse, xtick={0,30,60,120},
+  scaled y ticks=false, yticklabel style={/pgf/number format/fixed, /pgf/number format/precision=3},
+  legend style={at={(0.5,1.03)}, anchor=south, legend columns=2, draw=none},
+  legend cell align=left, grid=major, grid style={gray!20}]
+\addplot[gray, dashed, domain=0:120, forget plot] {0};
+\addplot+[blue, mark=o, error bars/.cd, y dir=both, y explicit]
+  table[x=offset, y=gap, y error=err, col sep=comma] {generated/fig_timing_kalshi.csv};
+\addlegendentry{Kalshi}
+\addplot+[red, mark=x, error bars/.cd, y dir=both, y explicit]
+  table[x=offset, y=gap, y error=err, col sep=comma] {generated/fig_timing_pm.csv};
+\addlegendentry{Polymarket}
+\end{axis}
+\end{tikzpicture}
+\caption{Calibration-slope gap to the Betfair close by read time, with 95\% intervals.
+Negative means the venue's probabilities are more extreme than Betfair's.}\label{fig:timing}
+\end{figure}
+
+\subsection{Returns by price and liquidity}
+
+Table~\ref{tab:flb} shows the classic favourite--longshot shape in returns. Before fees, outcomes
+priced under 10\% lose about a quarter to a third of the stake, but there are only a few hundred
+such rows and the standard errors are wide. Table~\ref{tab:rq4} finds no detectable relation
+between accuracy and venue volume, and no difference between the five largest leagues and the
+rest.
+
+\begin{table}[htbp]\centering\small
+\begin{threeparttable}
+\caption{Return to a unit stake at the venue's normalised price, by price bucket (exploratory)}\label{tab:flb}
+\begin{tabular}{lrrrr}\toprule
+& \multicolumn{2}{c}{Kalshi} & \multicolumn{2}{c}{Polymarket}\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Price & Return (s.e.) & Rows & Return (s.e.) & Rows\\\midrule
+\tabinput{generated/tab_flb.tex}
+\bottomrule\end{tabular}
+\begin{tablenotes}\footnotesize
+\item Before fees and the bid--ask spread. Not a trading result.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[htbp]\centering\small
+\caption{Accuracy gap on liquidity and league tier, 2025--26 (exploratory)}\label{tab:rq4}
+\begin{tabular}{lrcc}\toprule
+Venue & Matches & Per s.d.\ of log volume (s.e.) & Top five minus rest (s.e.)\\\midrule
+\tabinput{generated/tab_rq4.tex}
+\bottomrule\end{tabular}
+\end{table}
+
+\section{Pre-registered confirmatory design}\label{sec:design}
+
+The pre-analysis plan (\texttt{docs/pap/pre-analysis-plan.md}) was signed and frozen as the
+annotated git tag \texttt{pap-v1} at 2026-10-25 19:22:02 UTC (T0). The repository and the tag
+were pushed to GitHub 84 seconds later.
+
+\paragraph{Hypothesis.} \textbf{H1: at kickoff, Kalshi's match probabilities are as accurate as
+the Betfair Exchange closing line, to within $\delta = 0.002$ nats per match.} The null is
+non-equivalence, $|E[d]| \geq \delta$. It is tested by two one-sided tests at 5\% each, with the
+clustered standard error of Section~\ref{sec:measures}. Equivalence is declared if and only if
+the 90\% confidence interval lies inside $(-\delta, \delta)$. The margin is about the gap between
+ordinary bookmakers and the exchange in 2025--26, so the claim reads: Kalshi is closer to the
+exchange than ordinary bookmakers are. The plan discloses that the equivalence framing was chosen
+after seeing 2025--26.
+
+\paragraph{Sample.} Every league fixture in the \nLeagues{} divisions that kicks off after T0
+and on or before 30 June 2027, and is priced by both Kalshi and Betfair. If fewer than 1,500 such
+fixtures exist, H1 is reported as exploratory. Polymarket (H2) is secondary, as are the
+robustness variants of Table~\ref{tab:robust}.
+
+\paragraph{Single run.} The script \texttt{sharpmkt.confirm} runs once, after the window closes.
+It refuses to run unless \texttt{pap-v1} is an annotated tag that HEAD descends from and every
+file under \texttt{src/}, plus \texttt{pyproject.toml} and \texttt{uv.lock}, equals its blob at
+the tag. It then:
+\begin{itemize}
+  \item creates an attempt marker by exclusive creation;
+  \item pulls the 2026--27 data itself, which is the first read of the confirmatory outcomes;
+  \item keeps the fixtures inside the window;
+  \item writes its output once.
+\end{itemize}
+Every pipeline module refuses the 2026--27 season unless this script started it.
+
+\paragraph{Power.} Table~\ref{tab:power} gives H1's power if the true difference is zero, by the
+share of the season remaining after T0. About four-fifths of 2026--27 remained at signing.
+
+\begin{table}[htbp]\centering\small
+\begin{threeparttable}
+\caption{Power of the equivalence test ($\delta = 0.002$, $\alpha = 0.05$) by share of a season}\label{tab:power}
+\begin{tabular}{lcccc}\toprule
+Venue & 100\% & 70\% & 60\% & 40\%\\\midrule
+\tabinput{generated/tab_power.tex}
+\bottomrule\end{tabular}
+\begin{tablenotes}\footnotesize
+\item Standard error from 2025--26, scaled by the square root of the share; true difference zero.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\section{Confirmatory results}\label{sec:confirm}
+
+\begin{center}
+\fbox{\parbox{0.88\textwidth}{\centering\vspace{0.3em}
+\textbf{To be completed after 30 June 2027.}\\[0.3em]
+This section will report, unedited from \texttt{docs/results/confirmatory.md}:
+\begin{itemize}
+  \item the window's fixture counts;
+  \item H1's mean, standard error, 90\% interval and TOST $p$-value, and whether equivalence holds;
+  \item H2 and the robustness variants;
+  \item the exploratory timing, calibration, returns and liquidity analyses, labelled
+    exploratory.
+\end{itemize}
+Any deviation from the plan will be listed with its date and reason.\vspace{0.3em}}}
+\end{center}
+
+\section{Discussion and limitations}
+
+On the exploratory evidence, the new prediction markets price European football about as well
+as the sharpest exchange, and better than ordinary bookmakers. That is a strong result for venues
+a few years old, and the mechanism may be simple. If their market makers quote off the exchange,
+the venues will match it almost by construction; the collinearity in Table~\ref{tab:rq2} is
+consistent with that. Being as sharp as the exchange is not the same as adding information to
+it. This design can show the first, and the data can't yet show the second.
+
+Several limits apply:
+\begin{itemize}
+  \item football-data's closing snapshot isn't time-stamped to the minute, which is why the
+    timing analysis matters;
+  \item coverage differs by venue and grew during the season;
+  \item Polymarket's volume is partly wash trading;
+  \item venue settlement occasionally disagrees with the official result;
+  \item the confirmatory test concerns one season of one sport.
+\end{itemize}
+
+\section*{Statements}
+
+\paragraph{Data and code.} \repo{}, tag \texttt{pap-v1}, holds all the code, the pre-analysis
+plan, the confirmatory script and a manifest (URL and SHA-256) of every data file and API
+response used. Raw data aren't redistributed; \texttt{make all} rebuilds every result from the
+public sources. This paper's numbers are generated by \texttt{paper/make\_inputs.py}.
+
+\paragraph{Preregistration.} The plan was frozen as the annotated tag \texttt{pap-v1} at
+2026-10-25 19:22:02 UTC and pushed to GitHub at 19:23:26 UTC, before any confirmatory fixture
+had kicked off.
+
+\paragraph{Use of AI.} The code, analysis and drafts were produced with Claude (Anthropic),
+running in Claude Code under the author's direction. The author set the questions, made every
+design decision in the plan and signed it.
+
+\paragraph{Interests.} The author holds no accounts or positions on Kalshi, Polymarket or Betfair
+and will not trade on them during the confirmatory window. The author has no funding from, or
+relationship with, any of them or any bookmaker.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

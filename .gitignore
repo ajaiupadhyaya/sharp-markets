@@ -5,3 +5,11 @@ __pycache__/
 data/raw/*
 !data/raw/MANIFEST.json
 data/derived/
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
