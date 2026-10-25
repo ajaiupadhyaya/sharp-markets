@@ -1,9 +1,9 @@
 # Pre-analysis plan: *Are Prediction Markets Sharp?*
 
-**Status: DRAFT, not signed (2026-10-25).** Nothing here binds until Ajai signs §0.1 and the
-annotated git tag `pap-v1` marks the frozen state. Each **[PROPOSED — Ajai to confirm]** block
-is a decision. At signing it is adopted as recommended unless Ajai writes a different choice into
-it. After the tag, any change is a deviation and goes in §9.
+**Status: SIGNED and FROZEN on 2026-10-25 (revision 1).** Ajai signed in §0.1, and the annotated
+git tag `pap-v1` marks the frozen state. Its tagger date is T0, the start of the confirmatory
+window. All ten decisions are adopted as recommended. Any change from here on is a deviation and
+goes in §9.
 
 - Draft date: 2026-10-25. The code it binds is listed by blob in §8.2 (authoritative over any commit id).
 - Evidence the decisions rest on: [`docs/power.md`](../power.md) ("the power check": 2025–26,
@@ -15,6 +15,10 @@ it. After the tag, any change is a deviation and goes in §9.
 ## Decisions for Ajai
 
 Read this first. Each line gives the recommendation, then the alternative.
+
+**Decided by Ajai on 2026-10-25:** all ten, as recommended. D1, D2, D3 and D10 were chosen
+individually (D10: no accounts or positions, and no trading during the window); D4–D9 were
+approved together at signing.
 
 1. **D1 Confirmatory family** (§2). Recommended: **one confirmatory hypothesis, H1 (Kalshi), at
    α = 0.05**; Polymarket's equivalence (H2) is secondary. Its power is only about 0.58–0.74 if
@@ -54,9 +58,15 @@ Read this first. Each line gives the recommendation, then the alternative.
 
 ### 0.1 Signature
 
-*Unsigned.* To sign: state which decisions are adopted as recommended and which are changed. The
-plan is then frozen with the annotated tag `pap-v1`, and the tag's time is T0, the start of the
-confirmatory window.
+Signed: Ajai Upadhyaya, 2026-10-25.
+
+Ajai's statement at signing: "I approve D4–D9 as recommended. Sign the plan, commit it, and
+create the annotated tag pap-v1." Earlier the same day, Ajai chose D1 (Kalshi only), D2 (0.002
+nats), D3 (read at kickoff) and D10 (no positions, no trading during the window), each as
+recommended.
+
+Adopted as recommended: D1–D10. T0 is the tagger date of `pap-v1` (`git for-each-ref
+refs/tags/pap-v1 --format='%(taggerdate:iso-strict)'`); `confirm.py` reads it from the tag.
 
 ### 0.2 Conventions
 
@@ -78,8 +88,8 @@ confirmatory window.
 - Exploratory knowledge: the hypothesis direction (equivalence, not superiority) was chosen
   after seeing that 2025–26's Kalshi−Betfair difference was −0.0003 ± 0.0004. That's why H1 is an
   equivalence test with a margin fixed in advance, rather than a test of "no difference".
-- **[PROPOSED — Ajai to confirm]** Financial interests: none in Kalshi, Polymarket, Betfair or
-  any bookmaker. No positions held or traded during the confirmatory window (D10).
+- Financial interests (D10, stated by Ajai on 2026-10-25): no accounts or positions on Kalshi,
+  Polymarket or Betfair, and none will be traded during the confirmatory window.
 
 ### 0.4 Protocols for the confirmatory run
 
@@ -246,7 +256,7 @@ because of its power (about 0.74 at 70% of a season).
 
 | date | step |
 |---|---|
-| before signing | ~~write and test `confirm.py` on 2025–26; record its blob hash~~ done (§8.2, §8.3); re-record the hashes if any code changes before the tag |
+| before signing | write and test `confirm.py` on 2025–26 and record the blobs: done (§8.2, §8.3) |
 | T0 (signing) | tag `pap-v1`; the confirmatory window opens |
 | 2027-06-30 | window closes |
 | on or after 2027-07-01 | one data pull, then one confirmatory run (P1–P3) |
@@ -263,11 +273,11 @@ because of its power (about 0.74 at 70% of a season).
 `sharpmkt.match` → `sharpmkt.kalshi prices` / `sharpmkt.polymarket prices` → `sharpmkt.panel`,
 all run on 2026–27 by `sharpmkt.confirm` (P1), which then writes `docs/results/confirmatory.md`.
 
-### 8.2 Bound blobs (draft, 2026-10-25)
+### 8.2 Bound blobs (at signing, 2026-10-25)
 
-The tag binds every file under `src/` plus `pyproject.toml` and `uv.lock` (P1c). The blobs at the
-time of this draft are below. They must match `git rev-parse pap-v1:<path>` at signing. If any
-file changes before the tag, this table is re-recorded at signing.
+The tag binds every file under `src/` plus `pyproject.toml` and `uv.lock` (P1c). Their blobs at
+signing are below and equal `git rev-parse pap-v1:<path>`. `confirm.py` refuses to run if any of
+them differs.
 
 | path | git blob (SHA-1) |
 |---|---|
@@ -312,4 +322,8 @@ These are exploratory numbers that show the script works. They aren't results.
 
 ## 9. Deviations
 
-*None (draft).*
+*None at freeze.*
+
+Any change after `pap-v1` to a hypothesis, specification, sample, inference, decision rule or
+bound file is recorded here with its date, the reason, Ajai's approval, and whether any
+confirmatory data had been read at the time (P4, P5).
